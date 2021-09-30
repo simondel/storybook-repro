@@ -5,7 +5,7 @@
   "projects": {
     "storybook": {
       "projectType": "application",
-      "sourceRoot": "",
+      "sourceRoot": "projects/angular-components/src",
       "root": "",
       "architect": {
         "build": {
@@ -15,9 +15,7 @@
             "outputPath": "dist",
             "tsConfig": "projects/angular-components/tsconfig.lib.json",
             "stylePreprocessorOptions": {
-              "includePaths": [
-                "projects/angular-components/src/scss"
-              ]
+              "includePaths": ["projects/angular-components/src/scss"]
             },
             "scripts": [],
             "styles": [
@@ -60,9 +58,7 @@
             "tsConfig": "projects/angular-components/tsconfig.spec.json",
             "karmaConfig": "projects/angular-components/karma.conf.js",
             "stylePreprocessorOptions": {
-              "includePaths": [
-                "projects/angular-components/src/scss"
-              ]
+              "includePaths": ["projects/angular-components/src/scss"]
             }
           }
         },
@@ -73,9 +69,7 @@
               "projects/angular-components/tsconfig.lib.json",
               "projects/angular-components/tsconfig.spec.json"
             ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "exclude": ["**/node_modules/**"]
           }
         }
       }
