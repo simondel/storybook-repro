@@ -1,0 +1,17 @@
+<div class="mycustom-button__container mycustom-button--height__{{height}} mycustom-button--width__{{width}}">
+  <button class="mycustom-button mycustom-button--type__{{buttonType}} mycustom-button--height__{{height}} mycustom-button--width__{{width}}"
+          [title]="title"
+          [disabled]="isDisabled"
+          [class.mycustom-button--loading]="loading"
+          [class.mycustom-button--outline]="outline"
+          [class.mycustom-button--appended]="appended"
+          [class.mycustom-button--has-label]="buttonLabelComponent"
+          [class.mycustom-button--no-hover]="noHover"
+          [class.mycustom-button--no-text-wrap]="noTextWrap">
+
+    <div class="mycustom-button__text">
+      <ng-content select="[contentProjectionKey=buttonLabel], mycustom-button-label"></ng-content>
+    </div>
+
+  </button>
+</div>

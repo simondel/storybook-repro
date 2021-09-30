@@ -1,0 +1,1265 @@
+{
+    "pipes": [],
+    "interfaces": [],
+    "injectables": [],
+    "guards": [],
+    "interceptors": [],
+    "classes": [
+        {
+            "name": "Colors",
+            "id": "class-Colors-42a4305fb4f83c55f6aeabcf3e1a2b54",
+            "file": "projects/angular-components/src/lib/colors.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "class",
+            "sourceCode": "export class Colors {\r\n\r\n  static get headerColor(): string {\r\n    return getPropertyValue('--header-color');\r\n  }\r\n\r\n}\r\n\r\nfunction getPropertyValue(name: string): string {\r\n  const doc = document.getElementById('root') ?? document.getElementsByClassName('root')[0];\r\n  const propertyValue = getComputedStyle(doc).getPropertyValue(name);\r\n\r\n  if (!propertyValue) {\r\n    throw new Error(`Couldn't retrieve value for property '${name}'.`);\r\n  }\r\n\r\n  return propertyValue;\r\n}\r\n",
+            "properties": [],
+            "methods": [],
+            "indexSignatures": [],
+            "accessors": {
+                "headerColor": {
+                    "name": "headerColor",
+                    "getSignature": {
+                        "name": "headerColor",
+                        "type": "string",
+                        "returnType": "string",
+                        "line": 4
+                    }
+                }
+            },
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "Convert",
+            "id": "class-Convert-0ae1c277fdb769d0b53688b5ffa7fd8e",
+            "file": "projects/angular-components/src/lib/globals.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "class",
+            "sourceCode": "import { AbstractControl, FormGroup } from '@angular/forms';\r\n\r\nimport { Observable, OperatorFunction, of } from 'rxjs';\r\nimport { filter } from 'rxjs/operators';\r\n\r\nexport function observableOrValue<T>(value: Observable<T> | T): Observable<T> {\r\n    return value instanceof Observable ? value : of(value);\r\n  }\r\n\r\nexport function getObservableValueSynchronously<T>(observable: Observable<T>): T {\r\n    let value: T | undefined;\r\n    let subscribedInvoked = false;\r\n    observable.subscribe(val => {\r\n      value = val;\r\n      subscribedInvoked = true;\r\n    }).unsubscribe();\r\n\r\n    if (!subscribedInvoked) throw new Error('You invoked getObservableValueSynchronously, but the observable didn\\'t return a synchronous result');\r\n\r\n    // The subscribedInvoked checks this condition. Therefore this cast is allowed in this case\r\n    return value as unknown as T;\r\n  }\r\n\r\nexport class Convert {\r\n    static toString(val: any): string | undefined;\r\n    static toString(val: any, opts: { allowUndefinedOrNull: false }): string;\r\n    static toString(val: any, { allowUndefinedOrNull }: { allowUndefinedOrNull: boolean } = { allowUndefinedOrNull: true }): string | undefined {\r\n        const throwError: () => never = () => { throw new Error(`Failed to convert value to a string. A string/number${allowUndefinedOrNull ? '/undefined/null' : ''} was expected`); };\r\n        switch (typeof val) {\r\n        case 'string':\r\n          return val;\r\n        case 'number':\r\n        case 'bigint':\r\n          return val.toString();\r\n        case 'undefined':\r\n          return allowUndefinedOrNull ? undefined : throwError();\r\n        case 'object':\r\n          if (val === null && allowUndefinedOrNull) {\r\n            return undefined;\r\n          }\r\n          return val.toString();\r\n        default:\r\n          return throwError();\r\n      }\r\n    }\r\n\r\n    static toSpecificString<T extends string>(val: unknown, options: Array<T>): T {\r\n      // tslint:disable-next-line: strict-comparisons\r\n      if (typeof val !== 'string' || !options.some(x => x === val)) {\r\n        throw new Error(`Failed to convert string value to requires string in array. Received value ${String(val)}, options were: ${options.join(',')}`);\r\n      }\r\n\r\n      return val as T;\r\n    }\r\n\r\n    static toArray<T = any>(val: any, { fallbackToEmptyArrayWhenUndefined }: { fallbackToEmptyArrayWhenUndefined: boolean } = { fallbackToEmptyArrayWhenUndefined: false }): Array<T> {\r\n      if (!(val instanceof Array)) {\r\n        if ((val === undefined || val === null) && fallbackToEmptyArrayWhenUndefined) {\r\n          return [];\r\n        }\r\n        throw new Error('Invalid parameter provided for ');\r\n      }\r\n      return val;\r\n    }\r\n\r\n    /**\r\n     * Converts the given value\r\n     */\r\n    static toEnum<T>(val: any, _enum: any): T {\r\n      for (const value of Object.values(_enum)) {\r\n        if (value === val) {\r\n          return val as T;\r\n        }\r\n      }\r\n\r\n      throw new Error('The provided value did not match the provided enumeration');\r\n    }\r\n}\r\n\r\nexport function triggerFormValidation(form: FormGroup): void {\r\n  Object.keys(form.controls).forEach(key => {\r\n    const control = form.get(key);\r\n    if (control instanceof FormGroup) {\r\n      triggerFormValidation(control);\r\n    } else if (control instanceof AbstractControl && control.enabled) {\r\n      // only update controls that are enabled. otherwise when a disabled control is enabled, the validation is already triggered\r\n      control.markAsDirty();\r\n      control.updateValueAndValidity();\r\n    }\r\n  });\r\n}\r\n\r\n// tslint:disable-next-line:no-null-undefined-union -- for exlcusion of filterTruthy they must both exist because they are both falsy\r\nexport type FalsyValues = null | undefined | '' | 0 | typeof NaN | 0n;\r\n\r\nexport function filterTruthy<TInput>(): OperatorFunction<TInput, Exclude<TInput, FalsyValues>> {\r\n  return observable => observable.pipe(filter<Exclude<TInput, FalsyValues>>(val => Boolean(val)));\r\n}\r\n\r\n/**\r\n * Creates typesafety for components, so it only includes properties\r\n */\r\nexport type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];\r\nexport type WithoutFunctions<T> = Pick<T, NonFunctionPropertyNames<T>>;\r\n",
+            "properties": [],
+            "methods": [
+                {
+                    "name": "toArray",
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "type": "literal type",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "{ fallbackToEmptyArrayWhenUndefined: false }"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Array<T>",
+                    "typeParameters": [
+                        "T"
+                    ],
+                    "line": 56,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        124
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "type": "literal type",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "{ fallbackToEmptyArrayWhenUndefined: false }",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "toEnum",
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "_enum",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "T",
+                    "typeParameters": [
+                        "T"
+                    ],
+                    "line": 69,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "rawdescription": "\n\nConverts the given value\n",
+                    "description": "<p>Converts the given value</p>\n",
+                    "modifierKind": [
+                        124
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "_enum",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "toSpecificString",
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "options",
+                            "type": "Array<T>",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "T",
+                    "typeParameters": [
+                        "T"
+                    ],
+                    "line": 47,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        124
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "val",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "options",
+                            "type": "Array<T>",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "toString",
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string | undefined",
+                    "typeParameters": [],
+                    "line": 25,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        124
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "toString",
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "opts",
+                            "type": "literal type",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string",
+                    "typeParameters": [],
+                    "line": 26,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        124
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "opts",
+                            "type": "literal type",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "toString",
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "type": "literal type",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "{ allowUndefinedOrNull: true }"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string | undefined",
+                    "typeParameters": [],
+                    "line": 27,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        124
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "val",
+                            "type": "any",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "type": "literal type",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "{ allowUndefinedOrNull: true }",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        }
+    ],
+    "directives": [],
+    "components": [
+        {
+            "name": "ButtonComponent",
+            "id": "component-ButtonComponent-53f8fe66aca3ec4736495e8aaca3deb1",
+            "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "mycustom-button",
+            "styleUrls": [
+                "./button.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./button.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [
+                {
+                    "name": "appended",
+                    "defaultValue": "false",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 26,
+                    "type": "boolean"
+                },
+                {
+                    "name": "buttonType",
+                    "defaultValue": "'primary'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 20,
+                    "type": "ButtonType"
+                },
+                {
+                    "name": "disabled",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 24,
+                    "type": "boolean"
+                },
+                {
+                    "name": "height",
+                    "defaultValue": "'medium'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 21,
+                    "type": "ButtonHeight"
+                },
+                {
+                    "name": "loading",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 25,
+                    "type": "boolean"
+                },
+                {
+                    "name": "noHover",
+                    "defaultValue": "false",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 27,
+                    "type": "boolean"
+                },
+                {
+                    "name": "noTextWrap",
+                    "defaultValue": "false",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 28,
+                    "type": "boolean"
+                },
+                {
+                    "name": "outline",
+                    "defaultValue": "false",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 23,
+                    "type": "boolean"
+                },
+                {
+                    "name": "title",
+                    "defaultValue": "''",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 23,
+                    "type": "string"
+                },
+                {
+                    "name": "width",
+                    "defaultValue": "'medium'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 22,
+                    "type": "ButtonWidth"
+                }
+            ],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "buttonLabelComponent",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "ButtonLabelComponent",
+                    "optional": false,
+                    "description": "",
+                    "line": 41,
+                    "decorators": [
+                        {
+                            "name": "ContentChild",
+                            "stringifiedArguments": "ButtonLabelComponent"
+                        }
+                    ]
+                },
+                {
+                    "name": "role",
+                    "defaultValue": "'button'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 44,
+                    "decorators": [
+                        {
+                            "name": "HostBinding",
+                            "stringifiedArguments": "'attr.role'"
+                        }
+                    ],
+                    "modifierKind": [
+                        143
+                    ]
+                }
+            ],
+            "methodsClass": [],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [
+                {
+                    "name": "attr.role",
+                    "defaultValue": "'button'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 44,
+                    "type": "\"button\""
+                },
+                {
+                    "name": "class.disabled",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 31,
+                    "type": "boolean"
+                },
+                {
+                    "name": "class.fill",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 37,
+                    "type": "boolean"
+                }
+            ],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import { Component, ContentChild, HostBinding, Input } from '@angular/core';\r\n\r\nimport { ButtonLabelComponent } from './button-label/button-label.component';\r\n\r\nexport const buttonTypes = ['primary', 'cancel', 'danger', 'ghost', 'success'] as const;\r\nexport type ButtonType = typeof buttonTypes[number];\r\n\r\nexport const buttonHeights = ['fill', 'micro', 'small', 'medium'] as const;\r\nexport type ButtonHeight = typeof buttonHeights[number];\r\n\r\nexport const buttonWidths = ['fill', 'wrap', 'small', 'medium'] as const;\r\nexport type ButtonWidth = typeof buttonWidths[number];\r\n\r\n@Component({\r\n  selector: 'mycustom-button',\r\n  templateUrl: './button.component.html',\r\n  styleUrls: ['./button.component.scss']\r\n})\r\nexport class ButtonComponent {\r\n  @Input() buttonType: ButtonType = 'primary';\r\n  @Input() height: ButtonHeight = 'medium';\r\n  @Input() width: ButtonWidth = 'medium';\r\n  @Input() title: string = '';  @Input() outline: boolean = false;\r\n  @Input() disabled: boolean;\r\n  @Input() loading: boolean;\r\n  @Input() appended: boolean = false;\r\n  @Input() noHover: boolean = false;\r\n  @Input() noTextWrap: boolean = false;\r\n\r\n  @HostBinding('class.disabled')\r\n  get isDisabled(): boolean {\r\n    return this.disabled || this.loading;\r\n  }\r\n\r\n\r\n  @HostBinding('class.fill')\r\n  get hostFillClass(): boolean {\r\n    return this.width === 'fill';\r\n  }\r\n\r\n  @ContentChild(ButtonLabelComponent) buttonLabelComponent: ButtonLabelComponent;\r\n\r\n  @HostBinding('attr.role')\r\n  readonly role = 'button';\r\n}\r\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": "@import \"extends/borders\";\r\n\r\n@mixin button-colors($color, $color-darken, $font-color, $outline, $is-ghost: false) {\r\n  border: $color solid 1px;\r\n\r\n  @if ($outline) {\r\n    background: if($is-ghost, none, white);\r\n    color: $color;\r\n  }\r\n\r\n  @else {\r\n    background-color: $color;\r\n    color: $font-color;\r\n  }\r\n\r\n  &:not([disabled]):not(.disabled):not(.mycustom-button--no-hover):hover,\r\n  &:not([disabled]):not(.disabled):not(.mycustom-button--no-hover):active {\r\n    @if ($outline) {\r\n      background-color: $color;\r\n      border-color: $color;\r\n      color: $font-color;\r\n    }\r\n\r\n    @else {\r\n      background-color: $color-darken;\r\n      border-color: $color-darken;\r\n    }\r\n  }\r\n}\r\n\r\n@mixin secondary-colors($outline) {\r\n  @include button-colors(var(--secondary-color), var(--secondary-color-darken), var(--secondary-font-color), $outline);\r\n}\r\n\r\n@mixin cancel-colors($outline) {\r\n  @include button-colors(var(--btn-cancel-color), var(--btn-cancel-hover-color), var(--font-color), $outline);\r\n}\r\n\r\n@mixin danger-colors($outline) {\r\n  @include button-colors(var(--error-color), var(--error-color), var(--secondary-font-color), $outline);\r\n}\r\n\r\n@mixin success-colors($outline) {\r\n  @include button-colors(var(--success-color), var(--success-color-darken), var(--secondary-font-color), $outline);\r\n}\r\n\r\n@mixin ghost-colors($outline) {\r\n  @include button-colors(white, white, var(--base-theme-secondary-color), $outline, true);\r\n}\r\n\r\n:host {\r\n  display: inline-flex;\r\n}\r\n\r\n:host(.disabled) {\r\n  pointer-events: none;\r\n}\r\n\r\n:host(.fill) {\r\n  width: 100%;\r\n}\r\n\r\n.mycustom-button {\r\n  display: flex;\r\n  justify-content: center;\r\n  text-align: center;\r\n  align-items: center;\r\n  flex-direction: row;\r\n\r\n  padding-right: 10px;\r\n  padding-left: 10px;\r\n  @extend %border-radius;\r\n\r\n  &[disabled] {\r\n    pointer-events: none;\r\n    opacity: 0.3;\r\n    user-select: none;\r\n  }\r\n\r\n  &:focus {\r\n    box-shadow: none;\r\n  }\r\n\r\n  &:hover {\r\n    cursor: pointer;\r\n  }\r\n\r\n  &__container {\r\n    position: relative;\r\n    display: flex;\r\n    flex-direction: column;\r\n  }\r\n\r\n  &__text {\r\n    margin-right: 5px;\r\n    margin-left: 5px;\r\n\r\n    &:empty {\r\n      display: none;\r\n    }\r\n  }\r\n\r\n  &__loader {\r\n    position: absolute;\r\n    bottom: 5px;\r\n    left: 0;\r\n    right: 0;\r\n  }\r\n\r\n  &--appended {\r\n    border-bottom-left-radius: 0%;\r\n    border-top-left-radius: 0%;\r\n  }\r\n\r\n  &--height {\r\n    &__fill {\r\n      height: 100%;\r\n    }\r\n\r\n    &__micro {\r\n      height: 32px;\r\n    }\r\n\r\n    &__small {\r\n      height: 40px;\r\n    }\r\n\r\n    &__medium {\r\n      height: 48px;\r\n    }\r\n  }\r\n\r\n  &--width {\r\n    &__fill {\r\n      width: 100%;\r\n    }\r\n\r\n    &__small {\r\n      width: 40px;\r\n    }\r\n\r\n    &__medium {\r\n      &.mycustom-button {\r\n        &--has-label {\r\n          min-width: 100px;\r\n        }\r\n      }\r\n    }\r\n  }\r\n\r\n  &--type {\r\n    &__primary {\r\n      @include secondary-colors($outline: false);\r\n\r\n      &.mycustom-button--outline {\r\n        @include secondary-colors($outline: true);\r\n      }\r\n    }\r\n\r\n    &__cancel {\r\n      @include cancel-colors($outline: false);\r\n    }\r\n\r\n    &__danger {\r\n      @include danger-colors($outline: false);\r\n\r\n      &.mycustom-button--outline {\r\n        @include danger-colors($outline: true);\r\n      }\r\n    }\r\n\r\n    &__success {\r\n      @include success-colors($outline: false);\r\n\r\n      &.mycustom-button--outline {\r\n        @include success-colors($outline: true);\r\n      }\r\n    }\r\n\r\n    &__ghost {\r\n      @include ghost-colors($outline: false);\r\n\r\n      &.mycustom-button--outline {\r\n        @include ghost-colors($outline: true);\r\n      }\r\n    }\r\n  }\r\n\r\n  &--no-text-wrap {\r\n    white-space: nowrap;\r\n  }\r\n}\r\n",
+                    "styleUrl": "./button.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "accessors": {
+                "isDisabled": {
+                    "name": "isDisabled",
+                    "getSignature": {
+                        "name": "isDisabled",
+                        "type": "boolean",
+                        "returnType": "boolean",
+                        "line": 31
+                    }
+                },
+                "hostFillClass": {
+                    "name": "hostFillClass",
+                    "getSignature": {
+                        "name": "hostFillClass",
+                        "type": "boolean",
+                        "returnType": "boolean",
+                        "line": 37
+                    }
+                }
+            },
+            "templateData": "<div class=\"mycustom-button__container mycustom-button--height__{{height}} mycustom-button--width__{{width}}\">\r\n  <button class=\"mycustom-button mycustom-button--type__{{buttonType}} mycustom-button--height__{{height}} mycustom-button--width__{{width}}\"\r\n          [title]=\"title\"\r\n          [disabled]=\"isDisabled\"\r\n          [class.mycustom-button--loading]=\"loading\"\r\n          [class.mycustom-button--outline]=\"outline\"\r\n          [class.mycustom-button--appended]=\"appended\"\r\n          [class.mycustom-button--has-label]=\"buttonLabelComponent\"\r\n          [class.mycustom-button--no-hover]=\"noHover\"\r\n          [class.mycustom-button--no-text-wrap]=\"noTextWrap\">\r\n\r\n    <div class=\"mycustom-button__text\">\r\n      <ng-content select=\"[contentProjectionKey=buttonLabel], mycustom-button-label\"></ng-content>\r\n    </div>\r\n\r\n  </button>\r\n</div>\r\n"
+        },
+        {
+            "name": "ButtonLabelComponent",
+            "id": "component-ButtonLabelComponent-1ba7b4ae57edc985e38c36e3f73f9720",
+            "file": "projects/angular-components/src/lib/buttons/button/button-label/button-label.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "mycustom-button-label",
+            "styleUrls": [
+                "./button-label.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./button-label.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [],
+            "methodsClass": [],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import { Component } from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'mycustom-button-label',\r\n  templateUrl: './button-label.component.html',\r\n  styleUrls: ['./button-label.component.scss']\r\n})\r\nexport class ButtonLabelComponent {\r\n\r\n}\r\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ":host {\r\n  display: flex;\r\n  align-items: center;\r\n}\r\n\r\nspan {\r\n  font-size: 14px;\r\n  line-height: 1.41;\r\n}\r\n",
+                    "styleUrl": "./button-label.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "templateData": "<span>\r\n  <ng-content></ng-content>\r\n</span>"
+        }
+    ],
+    "modules": [
+        {
+            "name": "ButtonsModule",
+            "id": "module-ButtonsModule-325e12924ecc31b12692e67e779481fe",
+            "description": "",
+            "deprecationMessage": "",
+            "deprecated": false,
+            "file": "projects/angular-components/src/lib/buttons/buttons.module.ts",
+            "methods": [],
+            "sourceCode": "import { CommonModule } from '@angular/common';\r\nimport { NgModule } from '@angular/core';\r\n\r\nimport { ButtonLabelComponent } from './button/button-label/button-label.component';\r\nimport { ButtonComponent } from './button/button.component';\r\n\r\n@NgModule({\r\n  declarations: [ButtonComponent, ButtonLabelComponent],\r\n  imports: [\r\n    CommonModule\r\n  ],\r\n  exports: [ButtonComponent, ButtonLabelComponent]\r\n})\r\nexport class ButtonsModule { }\r\n",
+            "children": [
+                {
+                    "type": "providers",
+                    "elements": []
+                },
+                {
+                    "type": "declarations",
+                    "elements": [
+                        {
+                            "name": "ButtonComponent"
+                        },
+                        {
+                            "name": "ButtonLabelComponent"
+                        }
+                    ]
+                },
+                {
+                    "type": "imports",
+                    "elements": []
+                },
+                {
+                    "type": "exports",
+                    "elements": [
+                        {
+                            "name": "ButtonComponent"
+                        },
+                        {
+                            "name": "ButtonLabelComponent"
+                        }
+                    ]
+                },
+                {
+                    "type": "bootstrap",
+                    "elements": []
+                },
+                {
+                    "type": "classes",
+                    "elements": []
+                }
+            ]
+        }
+    ],
+    "miscellaneous": {
+        "variables": [
+            {
+                "name": "buttonHeights",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "",
+                "defaultValue": "['fill', 'micro', 'small', 'medium'] as const"
+            },
+            {
+                "name": "buttonTypes",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "",
+                "defaultValue": "['primary', 'cancel', 'danger', 'ghost', 'success'] as const"
+            },
+            {
+                "name": "buttonWidths",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "",
+                "defaultValue": "['fill', 'wrap', 'small', 'medium'] as const"
+            },
+            {
+                "name": "context",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "projects/angular-components/src/test.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "",
+                "defaultValue": "require.context('./', true, /\\.spec\\.ts$/)"
+            },
+            {
+                "name": "require",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "projects/angular-components/src/test.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "any"
+            }
+        ],
+        "functions": [
+            {
+                "name": "filterTruthy",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "ctype": "miscellaneous",
+                "subtype": "function",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "args": [],
+                "returnType": "OperatorFunction<TInput, Exclude<TInput, FalsyValues>>"
+            },
+            {
+                "name": "getObservableValueSynchronously",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "ctype": "miscellaneous",
+                "subtype": "function",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "args": [
+                    {
+                        "name": "observable",
+                        "type": "Observable",
+                        "deprecated": false,
+                        "deprecationMessage": ""
+                    }
+                ],
+                "returnType": "T",
+                "jsdoctags": [
+                    {
+                        "name": "observable",
+                        "type": "Observable",
+                        "deprecated": false,
+                        "deprecationMessage": "",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "getPropertyValue",
+                "file": "projects/angular-components/src/lib/colors.ts",
+                "ctype": "miscellaneous",
+                "subtype": "function",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "args": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "deprecated": false,
+                        "deprecationMessage": ""
+                    }
+                ],
+                "returnType": "string",
+                "jsdoctags": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "deprecated": false,
+                        "deprecationMessage": "",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "observableOrValue",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "ctype": "miscellaneous",
+                "subtype": "function",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "args": [
+                    {
+                        "name": "value",
+                        "deprecated": false,
+                        "deprecationMessage": ""
+                    }
+                ],
+                "returnType": "Observable<T>",
+                "jsdoctags": [
+                    {
+                        "name": "value",
+                        "deprecated": false,
+                        "deprecationMessage": "",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "triggerFormValidation",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "ctype": "miscellaneous",
+                "subtype": "function",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "args": [
+                    {
+                        "name": "form",
+                        "type": "FormGroup",
+                        "deprecated": false,
+                        "deprecationMessage": ""
+                    }
+                ],
+                "returnType": "void",
+                "jsdoctags": [
+                    {
+                        "name": "form",
+                        "type": "FormGroup",
+                        "deprecated": false,
+                        "deprecationMessage": "",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            }
+        ],
+        "typealiases": [
+            {
+                "name": "ButtonHeight",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "",
+                "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 192
+            },
+            {
+                "name": "ButtonType",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "",
+                "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 192
+            },
+            {
+                "name": "ButtonWidth",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "",
+                "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 192
+            },
+            {
+                "name": "FalsyValues",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "null | undefined | string | \"0\" |  | \"0n\"",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 185
+            },
+            {
+                "name": "NonFunctionPropertyNames",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "<p>Creates typesafety for components, so it only includes properties</p>\n",
+                "kind": 192
+            },
+            {
+                "name": "WithoutFunctions",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "Pick<T | NonFunctionPropertyNames<T>>",
+                "file": "projects/angular-components/src/lib/globals.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 176
+            }
+        ],
+        "enumerations": [],
+        "groupedVariables": {
+            "projects/angular-components/src/lib/buttons/button/button.component.ts": [
+                {
+                    "name": "buttonHeights",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "defaultValue": "['fill', 'micro', 'small', 'medium'] as const"
+                },
+                {
+                    "name": "buttonTypes",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "defaultValue": "['primary', 'cancel', 'danger', 'ghost', 'success'] as const"
+                },
+                {
+                    "name": "buttonWidths",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "defaultValue": "['fill', 'wrap', 'small', 'medium'] as const"
+                }
+            ],
+            "projects/angular-components/src/test.ts": [
+                {
+                    "name": "context",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "projects/angular-components/src/test.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "defaultValue": "require.context('./', true, /\\.spec\\.ts$/)"
+                },
+                {
+                    "name": "require",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "projects/angular-components/src/test.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "any"
+                }
+            ]
+        },
+        "groupedFunctions": {
+            "projects/angular-components/src/lib/globals.ts": [
+                {
+                    "name": "filterTruthy",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "ctype": "miscellaneous",
+                    "subtype": "function",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "args": [],
+                    "returnType": "OperatorFunction<TInput, Exclude<TInput, FalsyValues>>"
+                },
+                {
+                    "name": "getObservableValueSynchronously",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "ctype": "miscellaneous",
+                    "subtype": "function",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "args": [
+                        {
+                            "name": "observable",
+                            "type": "Observable",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "returnType": "T",
+                    "jsdoctags": [
+                        {
+                            "name": "observable",
+                            "type": "Observable",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "observableOrValue",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "ctype": "miscellaneous",
+                    "subtype": "function",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "args": [
+                        {
+                            "name": "value",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "returnType": "Observable<T>",
+                    "jsdoctags": [
+                        {
+                            "name": "value",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "triggerFormValidation",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "ctype": "miscellaneous",
+                    "subtype": "function",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "args": [
+                        {
+                            "name": "form",
+                            "type": "FormGroup",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "returnType": "void",
+                    "jsdoctags": [
+                        {
+                            "name": "form",
+                            "type": "FormGroup",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "projects/angular-components/src/lib/colors.ts": [
+                {
+                    "name": "getPropertyValue",
+                    "file": "projects/angular-components/src/lib/colors.ts",
+                    "ctype": "miscellaneous",
+                    "subtype": "function",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "returnType": "string",
+                    "jsdoctags": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "groupedEnumerations": {},
+        "groupedTypeAliases": {
+            "projects/angular-components/src/lib/buttons/button/button.component.ts": [
+                {
+                    "name": "ButtonHeight",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "",
+                    "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 192
+                },
+                {
+                    "name": "ButtonType",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "",
+                    "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 192
+                },
+                {
+                    "name": "ButtonWidth",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "",
+                    "file": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 192
+                }
+            ],
+            "projects/angular-components/src/lib/globals.ts": [
+                {
+                    "name": "FalsyValues",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "null | undefined | string | \"0\" |  | \"0n\"",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 185
+                },
+                {
+                    "name": "NonFunctionPropertyNames",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "<p>Creates typesafety for components, so it only includes properties</p>\n",
+                    "kind": 192
+                },
+                {
+                    "name": "WithoutFunctions",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "Pick<T | NonFunctionPropertyNames<T>>",
+                    "file": "projects/angular-components/src/lib/globals.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 176
+                }
+            ]
+        }
+    },
+    "routes": [],
+    "coverage": {
+        "count": 1,
+        "status": "low",
+        "files": [
+            {
+                "filePath": "projects/angular-components/src/lib/buttons/button/button-label/button-label.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "ButtonLabelComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "ButtonComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/16",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "buttonHeights",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "buttonTypes",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/buttons/button/button.component.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "buttonWidths",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/colors.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "Colors",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/colors.ts",
+                "type": "function",
+                "linktype": "miscellaneous",
+                "linksubtype": "function",
+                "name": "getPropertyValue",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/globals.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "Convert",
+                "coveragePercent": 14,
+                "coverageCount": "1/7",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/globals.ts",
+                "type": "function",
+                "linktype": "miscellaneous",
+                "linksubtype": "function",
+                "name": "filterTruthy",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/globals.ts",
+                "type": "function",
+                "linktype": "miscellaneous",
+                "linksubtype": "function",
+                "name": "getObservableValueSynchronously",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/globals.ts",
+                "type": "function",
+                "linktype": "miscellaneous",
+                "linksubtype": "function",
+                "name": "observableOrValue",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/lib/globals.ts",
+                "type": "function",
+                "linktype": "miscellaneous",
+                "linksubtype": "function",
+                "name": "triggerFormValidation",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/test.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "context",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "projects/angular-components/src/test.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "require",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            }
+        ]
+    }
+}

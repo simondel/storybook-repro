@@ -1,0 +1,8 @@
+@import "media-queries";
+
+%page-padding {
+  padding: 30px;
+  @include mobile {
+    padding: 30px 15px 15px 15px;
+  }
+}

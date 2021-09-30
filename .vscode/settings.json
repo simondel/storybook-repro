@@ -1,0 +1,18 @@
+{
+  "html.format.wrapAttributes": "force-aligned",
+  "html.format.wrapLineLength": 150,
+  "typescript.reportStyleChecksAsWarnings": false,
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.tslint": true
+  },
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "tslint.autoFixOnSave": true,
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "typescript.tsdk": "node_modules\\typescript\\lib"
+}

@@ -1,0 +1,7 @@
+$widths: 25, 50, 75;
+
+@each $width in $widths {
+  %max-width-#{$width} {
+    max-width: $width + unquote("%");
+  }
+}

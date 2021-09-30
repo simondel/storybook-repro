@@ -1,0 +1,192 @@
+@import "extends/borders";
+
+@mixin button-colors($color, $color-darken, $font-color, $outline, $is-ghost: false) {
+  border: $color solid 1px;
+
+  @if ($outline) {
+    background: if($is-ghost, none, white);
+    color: $color;
+  }
+
+  @else {
+    background-color: $color;
+    color: $font-color;
+  }
+
+  &:not([disabled]):not(.disabled):not(.mycustom-button--no-hover):hover,
+  &:not([disabled]):not(.disabled):not(.mycustom-button--no-hover):active {
+    @if ($outline) {
+      background-color: $color;
+      border-color: $color;
+      color: $font-color;
+    }
+
+    @else {
+      background-color: $color-darken;
+      border-color: $color-darken;
+    }
+  }
+}
+
+@mixin secondary-colors($outline) {
+  @include button-colors(var(--secondary-color), var(--secondary-color-darken), var(--secondary-font-color), $outline);
+}
+
+@mixin cancel-colors($outline) {
+  @include button-colors(var(--btn-cancel-color), var(--btn-cancel-hover-color), var(--font-color), $outline);
+}
+
+@mixin danger-colors($outline) {
+  @include button-colors(var(--error-color), var(--error-color), var(--secondary-font-color), $outline);
+}
+
+@mixin success-colors($outline) {
+  @include button-colors(var(--success-color), var(--success-color-darken), var(--secondary-font-color), $outline);
+}
+
+@mixin ghost-colors($outline) {
+  @include button-colors(white, white, var(--base-theme-secondary-color), $outline, true);
+}
+
+:host {
+  display: inline-flex;
+}
+
+:host(.disabled) {
+  pointer-events: none;
+}
+
+:host(.fill) {
+  width: 100%;
+}
+
+.mycustom-button {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  flex-direction: row;
+
+  padding-right: 10px;
+  padding-left: 10px;
+  @extend %border-radius;
+
+  &[disabled] {
+    pointer-events: none;
+    opacity: 0.3;
+    user-select: none;
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &__container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__text {
+    margin-right: 5px;
+    margin-left: 5px;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__loader {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+  }
+
+  &--appended {
+    border-bottom-left-radius: 0%;
+    border-top-left-radius: 0%;
+  }
+
+  &--height {
+    &__fill {
+      height: 100%;
+    }
+
+    &__micro {
+      height: 32px;
+    }
+
+    &__small {
+      height: 40px;
+    }
+
+    &__medium {
+      height: 48px;
+    }
+  }
+
+  &--width {
+    &__fill {
+      width: 100%;
+    }
+
+    &__small {
+      width: 40px;
+    }
+
+    &__medium {
+      &.mycustom-button {
+        &--has-label {
+          min-width: 100px;
+        }
+      }
+    }
+  }
+
+  &--type {
+    &__primary {
+      @include secondary-colors($outline: false);
+
+      &.mycustom-button--outline {
+        @include secondary-colors($outline: true);
+      }
+    }
+
+    &__cancel {
+      @include cancel-colors($outline: false);
+    }
+
+    &__danger {
+      @include danger-colors($outline: false);
+
+      &.mycustom-button--outline {
+        @include danger-colors($outline: true);
+      }
+    }
+
+    &__success {
+      @include success-colors($outline: false);
+
+      &.mycustom-button--outline {
+        @include success-colors($outline: true);
+      }
+    }
+
+    &__ghost {
+      @include ghost-colors($outline: false);
+
+      &.mycustom-button--outline {
+        @include ghost-colors($outline: true);
+      }
+    }
+  }
+
+  &--no-text-wrap {
+    white-space: nowrap;
+  }
+}

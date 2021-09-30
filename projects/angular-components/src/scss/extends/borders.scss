@@ -1,0 +1,9 @@
+// generic border radius
+// usage: @extend %border-radius
+%border-radius {
+  border-radius: 4px;
+}
+
+%border-radius-lg {
+  border-radius: 8px;
+}

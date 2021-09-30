@@ -1,0 +1,6 @@
+
+// Generic shadow for all components
+// usage: @extend %box-shadow
+%box-shadow{
+    box-shadow: 0 3px 13px 0 rgba(0, 0, 0, 0.1);
+}

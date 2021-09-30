@@ -1,0 +1,152 @@
+{
+  "rulesDirectory": [
+    "node_modules/codelyzer"
+  ],
+  "extends": [
+    "angular-tslint-rules"
+  ],
+  "rules": {
+    "unnecessary-else": false,
+    "use-component-view-encapsulation": false,
+    "max-file-line-count": [
+      true,
+      700
+    ],
+    "component-max-inline-declarations": [
+      true,
+      {
+        "template": 10
+      }
+    ],
+    "angular-whitespace": [
+      false
+    ],
+    "component-selector": [
+      true,
+      "element",
+      [
+        "mycustom"
+      ]
+    ],
+    "curly": false,
+    "cyclomatic-complexity": [
+      false
+    ],
+    "directive-selector": [
+      true,
+      "attribute",
+      [
+        "mycustom"
+      ]
+    ],
+    "no-forward-ref": false,
+    "indent": [
+      true,
+      "spaces",
+      2
+    ],
+    "i18n": [
+      false
+    ],
+    "template-i18n": [
+      false
+    ],
+    "newline-before-return": false,
+    "newline-per-chained-call": false,
+    "no-implicit-dependencies": false,
+    "no-unnecessary-callback-wrapper": false,
+    "max-classes-per-file": false,
+    "max-line-length": [
+      true,
+      {
+        "ignore-pattern": ".*([`\"']).*\\1.*"
+      }
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "public-static-field",
+          "protected-static-field",
+          "private-static-field",
+          "public-static-method",
+          "protected-static-method",
+          "private-static-method",
+          "private-instance-field",
+          "protected-instance-field",
+          "public-instance-field",
+          "public-constructor",
+          "protected-constructor",
+          "private-constructor",
+          "instance-method"
+        ]
+      }
+    ],
+    "no-console": [
+      true,
+      "debug",
+      "info",
+      "time",
+      "timeEnd",
+      "trace"
+    ],
+    "no-inferrable-types": false,
+    "no-parameter-reassignment": false,
+    "template-no-call-expression": false,
+    "no-void-expression": false,
+    "only-arrow-functions": false,
+    "no-pipe-impure": false,
+    "prefer-conditional-expression": false,
+    "prefer-function-over-method": false,
+    "prefer-inline-decorator": false,
+    "no-floating-promises": false,
+    "strict-boolean-expressions": false,
+    "template-cyclomatic-complexity": false,
+    "template-use-track-by-function": false,
+    "typedef": [
+      true,
+      "call-signature"
+    ],
+    "ordered-imports": [
+      true,
+      {
+        "named-imports-order": "lowercase-last",
+        "grouped-imports": true,
+        "groups": [
+          {
+            "name": "Angular libraries",
+            "match": "^@angular",
+            "order": 10
+          },
+          {
+            "name": "mycustom modules",
+            "match": "^@(app|core|shared|store|mycustom-components)",
+            "order": 30
+          },
+          {
+            "name": "mycustom decorators",
+            "match": "^@decorators",
+            "order": 40
+          },
+          {
+            "name": "parent directory",
+            "match": "^\\.\\.",
+            "order": 50
+          },
+          {
+            "name": "current directory",
+            "match": "^\\.",
+            "order": 60
+          },
+          {
+            "name": "other libraries",
+            "match": "^[^.].+",
+            "order": 20
+          }
+        ]
+      }
+    ],
+    "use-view-encapsulation": false,
+    "promise-function-async": false
+  }
+}

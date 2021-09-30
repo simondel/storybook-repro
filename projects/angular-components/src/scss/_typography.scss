@@ -1,0 +1,32 @@
+@import "variables/fonts", "variables/colors";
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+input {
+  color: $font-color;
+  font-family: "Open Sans", sans-serif;
+}
+
+p {
+  font-weight: 400;
+  margin: 0 0 15px 0;
+  font-size: $font-medium;
+}
+
+
+.subtext {
+  font-size: $font-medium;
+  color: var(--font-color-subtitle);
+
+  &.small {
+    font-size: $font-small;
+  }
+}
+
+input {
+  font-size: $font-large;
+}

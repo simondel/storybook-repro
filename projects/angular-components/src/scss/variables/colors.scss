@@ -1,0 +1,50 @@
+// CATEGORY: Brandable colors
+$primary-color: var(--primary-color);
+$primary-color-lighten: var(--primary-color-lighten);
+$primary-color-darken: var(--primary-color-darken);
+$primary-font-color: var(--primary-font-color);
+
+$secondary-color: var(--secondary-color);
+$secondary-color-lighten: var(--secondary-color-lighten);
+$secondary-color-darken: var(--secondary-color-darken);
+$secondary-font-color: var(--secondary-font-color);
+$secondary-font-color-darken: var(--secondary-font-color-darken);
+
+// CATEGORY: Other colors
+$base-theme-primary-color: var(--base-theme-primary-color);
+$base-theme-secondary-color: var(--base-theme-secondary-color);
+$base-theme-secondary-color-darken: var(--base-theme-secondary-color-darken);
+
+$information-color: var(--base-theme-secondary-color);
+$information-color-darken: var(--base-theme-secondary-color-darken);
+$error-color: var(--error-color);
+$pending-color: var(--pending-color);
+$success-color: var(--success-color);
+$success-color-darken: var(--success-color-darken);
+
+// CATEGORY: Focus colors
+$focus-color: var(--focus-color);
+$focus-font-color: var(--base-theme-secondary-color);
+
+// CATEGORY: Font colors
+$font-color: var(--font-color);
+$font-color-disabled: var(--font-color-disabled);
+$font-color-subtle: var(--font-color-subtle);
+$font-color-subtitle: var(--font-color-subtitle);
+$font-color-light: var(--font-color-light);
+$color-gray: var(--color-gray);
+
+// CATEGORY: Input colors
+$color-input: var(--color-input);
+$input-border-color: var(--input-border-color);
+$input-hover-color: var(--input-hover-color);
+$input-disabled-border-color: var(--input-disabled-border-color);
+
+$input-disabled-bg-color: var(--input-disabled-bg-color);
+
+// CATEGORY: Other
+$white: var(--white);
+
+$hover-bg-color: var(--hover-bg-color);
+
+$header-color: var(--header-color);
